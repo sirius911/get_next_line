@@ -15,9 +15,10 @@
 
 #include <unistd.h>
 
-#define BUFF_SIZE 100
+#define BUFF_SIZE 32
 #define FALSE 0
 #define TRUE 1
+#define DEBUG FALSE
 
 int	get_next_line(const int fd, char **line);
 
