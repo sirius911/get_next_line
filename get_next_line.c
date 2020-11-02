@@ -11,171 +11,98 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include "libft/libft.h"
+#include <stdio.h>
 
-// static				int ft_valid_fd(const int fd)
-// {
-// 	if (fd == -1)
-// 		return (-1);
-// 	else
-// 		return (0);
-// }
-int		is_nl(char *str)
+size_t				ft_strlen(const char *str)
 {
-/*recherche '\n' en partant du debut et renvoie la chaine sans '\n' */
-	int		i;
+	int				i;
 
 	i = 0;
 	while (str[i])
-	{
-		if (str[i] == '\n')
-			return (i);
 		i++;
-	}
-	return (-1);
+	return (i);
 }
 
-void	essais3(char *str)
+static int			nl_line(char **stack, char **line)
 {
-	int		i;
+	char			*tmp_stack;
+	char			*nl_stack;
+	int				i;
 
 	i = 0;
-	while(str[i])
+	nl_stack = *stack;
+	while (nl_stack[i] != '\n')
 	{
-		if (str[i] != '\n')
-			ft_putchar(str[i]);
-		else
-			ft_putstr("\\n");
+		if (nl_stack[i] == '\0')
+			return (0);
 		i++;
 	}
+	tmp_stack = &nl_stack[i];
+	*tmp_stack = '\0';
+	*line = ft_strdup(*stack);
+	*stack = ft_strdup(tmp_stack + 1);
+	if (*line == NULL)
+		*line = "";
+	return (1);
 }
 
-int				trait_tmp(char **tmp, char **str)
+static	int			read_file(int fd, char *heap, char **stack, char **line)
 {
-	int i = 0;
-	int	j = 0;
+	int				ret;
+	char			*tmp_stack;
 
-	if (DEBUG)
+	while ((ret = read(fd, heap, BUFFER_SIZE)) > 0)
 	{
-		ft_putstr("-----------------------\n");
-		ft_putstr("Traitement de tmp -> str: \n\ttmp = '");
-		essais3(*tmp);
-		ft_putstr("'");
-	}
-	if (ft_strlen(*tmp) > 0)
-	{
-		while ((*tmp)[i])
+		heap[ret] = '\0';
+		if (*stack)
 		{
-			if ((*tmp)[i] != '\n')
-			{
-				(*str)[j] = (*tmp)[i];
-				j++;
-			}
-			else if (i > 0)
-			{
-				// ft_putstr("\t --> Nouvelle ligne --> '");
-				(*str)[j] = '\0';
-				// ft_putstr(*str);
-				// ft_putstr("'\n\t tmp = '");
-				(*tmp) = ft_strdup(&(*tmp)[i + 1]);
-				// essais3(*tmp);
-				// ft_putstr("'\n");
-				return (1);
-			}
-			i++;
+			tmp_stack = *stack;
+			*stack = ft_strjoin(tmp_stack, heap);
+			free(tmp_stack);
+			tmp_stack = NULL;
 		}
+		else
+			*stack = ft_strdup(heap);
+		if (nl_line(stack, line))
+			break ;
 	}
-	(*str)[j] = '\0';
-	if (DEBUG)
-	{
-		ft_putstr("\nTraitement terminé ...\n");
-		ft_putstr("'\n\t tmp = '");
-		essais3(*tmp);
-		ft_putstr("'\tet str = '");
-		essais3(*str);
-		ft_putstr("'\n-------------------\n");
-	}
-	return (0);
-}
-
-int					read_file(const int fd, char **tmp, char **str)
-{
-	int				result;
-	char			buffer[BUFF_SIZE + 1];
-	int				eof;
-
-	if (DEBUG)
-		ft_putstr("lecture fichier...");
-	while ((result = read(fd, buffer, BUFF_SIZE)) > 0 && !ft_strchr(buffer,'\n'))
-	{
-		buffer[result] = '\0';
-		(*str) = ft_strjoin(*str, buffer);
-	}
-	buffer[result] = '\0';
-	if (result < BUFF_SIZE)
-	{
-		//buffer[result] = '\0';
-		eof = TRUE;
-	}
+	if (ret > 0)
+		return (1);
 	else
-		eof = FALSE;
-	(*tmp) = ft_strdup(buffer);
-	return (eof);
+		return (ret);
 }
 
 int					get_next_line(const int fd, char **line)
 {
-	char			*str;
-	static char		*tmp = "";
-	int 			pos_nl;
-	int				eof;
+	static char		*stack;
+	char			*heap;
+	int				i;
+	int				ret;
 
-	if (fd == -1 || line == NULL)
+	//printf("stack en entrée : %s\n", stack);
+	if (!line || fd < 0 || (read(fd, stack, 0) < 0) \
+		|| !(heap = (char *)malloc(sizeof(char) * BUFFER_SIZE + 1)))
 		return (-1);
-	str = (char *)malloc(sizeof(char) * (BUFF_SIZE + 1));
-	if (!str)
-		return (-1);
-
-	if (trait_tmp(&tmp, &str))
+	if (stack)
+		if (nl_line(&stack, line))
+		{
+			free (heap);
+			return (1);
+		}
+	i = 0;
+	while (i < BUFFER_SIZE)
+		heap[i++] = '\0';
+	ret = read_file(fd, heap, &stack, line);
+	free(heap);
+	//printf("ret= %d, stack = <%s>, line = <%s>\n", ret, stack, *line);
+	if (ret != 0 || stack == NULL || stack[0] == '\0')
 	{
-		(*line) = str;
-		return (1);
+		if (!ret) //&& *line
+			*line = ""; //NULL
+		return (ret);
 	}
-	eof = read_file(fd, &tmp, &str);
-	pos_nl = is_nl(tmp);
-	if (DEBUG)
-	{
-		ft_putstr("\n\t tmp = '");
-		essais3(tmp);
-		ft_putstr("'\tet str = '");
-		essais3(str);
-		ft_putstr("'\npos_nl = ");
-		ft_putnbr(pos_nl);
-		ft_putstr("\n>EOF = ");
-		ft_putnbr(eof);
-		ft_putstr("\n");
-	}
-	if (pos_nl >= 0)
-	{
-		str = ft_strncat(str, tmp, pos_nl);
-		tmp = ft_strdup(&tmp[pos_nl + 1]);
-		(*line) = str;
-	}
-	else /*(pos_nl == -1)*/
-	{
-		//if (ft_strlen(str) > 0)
-			(*line) = str;
-	}
-	if (DEBUG)
-	{
-		ft_putstr("\n## Avant sortie ##:\n\t tmp = '");
-		essais3(tmp);
-		ft_putstr("'\tet str = '");
-		essais3(str);
-	}
-	free(str);
-	if (eof && ft_strlen(tmp) == 0)
-		return (0);
-	else 
-		return (1);
+	*line = stack;
+	stack = NULL;
+	//printf("stack en sortie : %s\n", stack);
+	return (ret);
 }

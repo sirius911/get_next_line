@@ -13,13 +13,18 @@
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
-#include <unistd.h>
+# include <string.h>
+# include <unistd.h>
+# include <stdlib.h>
 
-#define BUFF_SIZE 32
-#define FALSE 0
-#define TRUE 1
-#define DEBUG FALSE
+# define DEBUG TRUE
 
-int	get_next_line(const int fd, char **line);
+int			get_next_line(const int fd, char **line);
+size_t		ft_strlen(const char *str);
+char		*ft_strcat(char *dest, const char *src);
+char		*ft_strcpy(char *dest, const char *src);
+char		*ft_strnew(size_t size);
+char		*ft_strdup(const char *str);
+char		*ft_strjoin(char const *s1, char const *s2);
 
 #endif
