@@ -1,29 +1,39 @@
-#include "libft/libft.h"
 #include "get_next_line.h"
 #include <stdio.h>
 #include <fcntl.h>
 
-int		main(int ac, char **av)
+int main(int argc, char **argv)
 {
-	char	*line;
-	int		fd;
-	int 	result;
+	int fd;
+	int ret;
+	int line;
+	char *buff;
 
-	if (ac == 2)
-		fd = open(av[1], O_RDONLY);
-	else
-		fd = 0;
-	do
+	line = 0;
+	if (argc == 2)
 	{
-		result = get_next_line(fd, &line);
-		printf("\t\t\t ********** %i : [%s]\n",result,line);
-		//printf("[%s]\n",line);
-	} while(result>0) ;
-/*
-	while(get_next_line(fd, &line))
-		printf("%s\n",line);
-	printf("%s\n", line);
-*/	
-	close(fd);
-  	return (0);
+		fd = open(argv[1], O_RDONLY);
+		while ((ret = get_next_line(fd, &buff)) > 0)
+		{
+			printf("[Return: %d] Line #%d (%p): %s\n", ret, ++line, buff, buff);
+			//free(buff);
+		}
+		printf("[Return: %d] Line #%d: %s\n", ret, ++line, buff);
+		if (ret == -1)
+			printf("-----------\nError\n");
+		else if (ret == 0)
+			printf("-----------\nEnd of file\n");
+		close(fd);
+	}
+	if (argc == 1)
+	{
+		while ((ret = get_next_line(0, &buff)) > 0)
+			printf("[Return: %d] Line #%d: %s\n", ret, ++line, buff);
+		if (ret == -1)
+			printf("-----------\nError\n");
+		else if (ret == 0)
+			printf("-----------\nEnd of stdin\n");
+		close(fd);
+	}
+	return (0);
 }
