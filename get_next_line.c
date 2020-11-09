@@ -13,96 +13,116 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-size_t				ft_strlen(const char *str)
+static int			nl_line(char *str)
 {
 	int				i;
 
 	i = 0;
+	if (!str)
+		return (0);
 	while (str[i])
+	{
+		if (str[i] == '\n')
+			return (1);
 		i++;
-	return (i);
+	}
+	return (0);
 }
 
-static int			nl_line(char **stack, char **line)
+static char			*recup_line(char *str)
+/* revoie une chaine malloc de la premiere ligne de str ou str si aucun'\n'*/
 {
-	char			*tmp_stack;
-	char			*nl_stack;
 	int				i;
+	char			*dest;
 
 	i = 0;
-	nl_stack = *stack;
-	while (nl_stack[i] != '\n')
+	if (!str)
+		return (NULL);
+	while (str[i] && str[i] != '\n')
+		i++;
+	dest = (char *)malloc(sizeof(char) * (i + 1));
+	if (!dest)
+		return (NULL);
+	i = 0;
+	while (str[i] && str[i] != '\n')
 	{
-		if (nl_stack[i] == '\0')
-			return (0);
+		dest[i] = str[i];
 		i++;
 	}
-	tmp_stack = &nl_stack[i];
-	*tmp_stack = '\0';
-	*line = ft_strdup(*stack);
-	*stack = ft_strdup(tmp_stack + 1);
-	if (*line == NULL)
-		*line = "";
-	return (1);
+	dest[i] = '\0';
+	return (dest);
 }
 
-static	int			read_file(int fd, char *heap, char **stack, char **line)
+static char			*save_static(char *str)
+/* tronc str de la premiere ligne rencontrée et renvoi un malloc*/
 {
-	int				ret;
-	char			*tmp_stack;
+	int				i;
+	int				j;
+	char			*dest;
 
-	while ((ret = read(fd, heap, BUFFER_SIZE)) > 0)
+	i = 0;
+	if (!str)
+		return (NULL);
+	while (str[i] && str[i] != '\n')
+		i++;
+	if (!str[i])
 	{
-		heap[ret] = '\0';
-		if (*stack)
-		{
-			tmp_stack = *stack;
-			*stack = ft_strjoin(tmp_stack, heap);
-			free(tmp_stack);
-			tmp_stack = NULL;
-		}
-		else
-			*stack = ft_strdup(heap);
-		if (nl_line(stack, line))
-			break ;
+		free(str);
+		return (NULL);
 	}
-	if (ret > 0)
-		return (1);
-	else
-		return (ret);
+	j = 0;
+	dest = (char *)malloc(sizeof(char) * (ft_strlen(str) - i));
+	if (!dest)
+		return (NULL);
+	i += 1;
+	while (str[i])
+		dest[j++] = str[i++];
+	dest[j] = '\0';
+	free(str);
+	return (dest);
 }
 
 int					get_next_line(const int fd, char **line)
 {
-	static char		*stack;
-	char			*heap;
-	int				i;
-	int				ret;
+	static char		*str_static;
+	char			*buffer;
+	int				result;
 
-	//printf("stack en entrée : %s\n", stack);
-	if (!line || fd < 0 || (read(fd, stack, 0) < 0) \
-		|| !(heap = (char *)malloc(sizeof(char) * BUFFER_SIZE + 1)))
+	/* 
+	On verifie fd, line et buffer_size :  => -1 si problemes
+	*/
+	if (fd < 0 || !line || BUFFER_SIZE <= 0)
 		return (-1);
-	if (stack)
-		if (nl_line(&stack, line))
-		{
-			free (heap);
-			return (1);
-		}
-	i = 0;
-	while (i < BUFFER_SIZE)
-		heap[i++] = '\0';
-	ret = read_file(fd, heap, &stack, line);
-	free(heap);
-	//printf("ret= %d, stack = <%s>, line = <%s>\n", ret, stack, *line);
-	if (ret != 0 || stack == NULL || stack[0] == '\0')
+	/*
+	on alloue un buffer de la taille de buffer_size
+	*/
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (-1);
+	/* tanque str_static ne contient pas un '\n' et que la lecture n'a pas renvoyé 0 (result)
+	*/
+	result = 1;
+	while (!nl_line(str_static) && result != 0)
 	{
-		if (!ret) //&& *line
-			*line = ""; //NULL
-		return (ret);
+		/* on lit un paquet de BUFFER_SIZE oct*/
+		result = read(fd, buffer, BUFFER_SIZE);
+		if (result == -1)
+		{
+			free(buffer);
+			return (-1);
+		}
+		buffer[result] = '\0';
+		/* on rajoute ce paquet à la variable static*/
+		str_static = ft_strjoin(str_static, buffer);
 	}
-	*line = stack;
-	stack = NULL;
-	//printf("stack en sortie : %s\n", stack);
-	return (ret);
+	free(buffer);
+	/* on recupere la line a renvoyer */
+	*line = recup_line(str_static);
+	/* on tronc la variable static de la ligne renvoyé */
+	str_static = save_static(str_static);
+	/* si la lecture a renvoyer 0 on renvoie 0 */
+	if (result == 0)
+		return (0);
+	/* sinon c'est qu'il y a encore quelque chose à renvoyer*/
+	return (1);
 }

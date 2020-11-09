@@ -12,39 +12,22 @@
 
 #include "get_next_line.h"
 
-char			*ft_strcat(char *dest, const char *src)
+size_t				ft_strlen(const char *str)
 {
-	size_t		i;
-	size_t		j;
+	int				i;
 
+	if (!str)
+		return (0);
 	i = 0;
-	while (dest[i])
+	while (str[i])
 		i++;
-	j = 0;
-	while (src[j])
-		dest[i++] = src[j++];
-	dest[i] = 0;
-	return (dest);
+	return (i);
 }
 
-char		*ft_strcpy(char *dest, const char *src)
+char			*ft_strnew(size_t size)
 {
+	char		*str;
 	size_t		i;
-
-	i = 0;
-	while (src[i])
-	{
-		dest[i] = src[i];
-		i++;
-	}
-	dest[i] = 0;
-	return (dest);
-}
-
-char		*ft_strnew(size_t size)
-{
-	char	*str;
-	size_t	i;
 
 	if (size <= 0)
 		return (NULL);
@@ -57,26 +40,43 @@ char		*ft_strnew(size_t size)
 	return (str);
 }
 
-char		*ft_strdup(const char *str)
+void			*ft_memmove(void *dest, const void *src, size_t len)
 {
-	char	*dest;
+	char 		*d;
+	char 		*s;
 
-	dest = ft_strnew(ft_strlen(str));
+	d = (char *)dest;
+	s = (char *)src;
+	if (dest == src)
+		return (dest);
+	if (s < d)
+	{
+		while (len--)
+			*(d + len) = *(s + len);
+		return (dest);
+	}
+	while (len--)
+		*d++ = *s++;
+	return (dest);
+}
+char			*ft_strjoin(char const *s1, char const *s2)
+{
+	char		*dest;
+	int			size_s1;
+	int			size_s2;
+	int			size_total;
+
+	if (!s1 && !s2)
+		return (NULL);
+	size_s1 = ft_strlen(s1);
+	size_s2 = ft_strlen(s2);
+	size_total = size_s1 + size_s2;
+	dest = ft_strnew(size_total + 1);
 	if (!dest)
 		return (NULL);
-	return (ft_strcpy(dest, str));
-}
-
-char		*ft_strjoin(char const *s1, char const *s2)
-{
-	char		*str;
-
-	if (!s1 || !s2)
-		return (NULL);
-	str = ft_strnew(ft_strlen(s1) + ft_strlen(s2));
-	if (!str)
-		return (NULL);
-	ft_strcpy(str, s1);
-	ft_strcat(str, s2);
-	return (str);
+	ft_memmove(dest, s1, size_s1);
+	ft_memmove(dest + size_s1, s2, size_s2);
+	dest[size_total] = '\0';
+	free ((char *)s1);
+	return (dest);
 }

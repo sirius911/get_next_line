@@ -17,14 +17,9 @@
 # include <unistd.h>
 # include <stdlib.h>
 
-# define DEBUG TRUE
-
 int			get_next_line(const int fd, char **line);
 size_t		ft_strlen(const char *str);
-char		*ft_strcat(char *dest, const char *src);
-char		*ft_strcpy(char *dest, const char *src);
 char		*ft_strnew(size_t size);
-char		*ft_strdup(const char *str);
 char		*ft_strjoin(char const *s1, char const *s2);
 
 #endif

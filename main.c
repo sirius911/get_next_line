@@ -15,8 +15,8 @@ int main(int argc, char **argv)
 		fd = open(argv[1], O_RDONLY);
 		while ((ret = get_next_line(fd, &buff)) > 0)
 		{
-			printf("[Return: %d] Line #%d (%p): %s\n", ret, ++line, buff, buff);
-			//free(buff);
+			printf("[Return: %d] Line #%d (%p): '%s'\n", ret, ++line, buff, buff);
+			free(buff);
 		}
 		printf("[Return: %d] Line #%d: %s\n", ret, ++line, buff);
 		if (ret == -1)
@@ -28,7 +28,10 @@ int main(int argc, char **argv)
 	if (argc == 1)
 	{
 		while ((ret = get_next_line(0, &buff)) > 0)
+		{
 			printf("[Return: %d] Line #%d: %s\n", ret, ++line, buff);
+			free(buff);
+		}
 		if (ret == -1)
 			printf("-----------\nError\n");
 		else if (ret == 0)
