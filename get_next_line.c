@@ -128,7 +128,6 @@ int					get_next_line(const int fd, char **line)
 	free(buffer);
 	*line = recup_line(str_static);
 	str_static = save_static(str_static);
-	if (result == 0)
-		return (0);
-	return (1);
+	result = (result == 0)? 0 : 1;
+	return (result);
 }
