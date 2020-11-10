@@ -108,10 +108,8 @@ int					get_next_line(const int fd, char **line)
 	char			*buffer;
 	int				result;
 
-	if (fd < 0 || !line || BUFFER_SIZE <= 0)
-		return (-1);
 	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer)
+	if (!buffer || fd < 0 || !line || BUFFER_SIZE <= 0)
 		return (-1);
 	result = 1;
 	while (!nl_line(str_static) && result != 0)
