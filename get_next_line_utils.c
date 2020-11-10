@@ -12,9 +12,9 @@
 
 #include "get_next_line.h"
 
-size_t				ft_strlen(const char *str)
+size_t			ft_strlen(const char *str)
 {
-	int				i;
+	int			i;
 
 	if (!str)
 		return (0);
@@ -42,8 +42,8 @@ char			*ft_strnew(size_t size)
 
 void			*ft_memmove(void *dest, const void *src, size_t len)
 {
-	char 		*d;
-	char 		*s;
+	char		*d;
+	char		*s;
 
 	d = (char *)dest;
 	s = (char *)src;
@@ -59,6 +59,7 @@ void			*ft_memmove(void *dest, const void *src, size_t len)
 		*d++ = *s++;
 	return (dest);
 }
+
 char			*ft_strjoin(char const *s1, char const *s2)
 {
 	char		*dest;
@@ -77,6 +78,6 @@ char			*ft_strjoin(char const *s1, char const *s2)
 	ft_memmove(dest, s1, size_s1);
 	ft_memmove(dest + size_s1, s2, size_s2);
 	dest[size_total] = '\0';
-	free ((char *)s1);
+	free((char *)s1);
 	return (dest);
 }

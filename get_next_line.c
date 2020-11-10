@@ -29,8 +29,11 @@ static int			nl_line(char *str)
 	return (0);
 }
 
+/*
+**	revoie une chaine malloc de la premiere ligne de str ou str si aucun'\n'
+*/
+
 static char			*recup_line(char *str)
-/* revoie une chaine malloc de la premiere ligne de str ou str si aucun'\n'*/
 {
 	int				i;
 	char			*dest;
@@ -53,8 +56,12 @@ static char			*recup_line(char *str)
 	return (dest);
 }
 
+/*
+**	Enlève la premiere ligne rencontrée et renvoi un malloc du reste
+**	de la chaine
+*/
+
 static char			*save_static(char *str)
-/* tronc str de la premiere ligne rencontrée et renvoi un malloc*/
 {
 	int				i;
 	int				j;
@@ -82,29 +89,33 @@ static char			*save_static(char *str)
 	return (dest);
 }
 
+/*
+**	1# On verifie fd, line et buffer_size :  => -1 si problemes.
+**	2# On alloue un buffer de la taille de buffer_size.
+**	3# Tanque str_static ne contient pas un '\n' et que la lecture
+**	n'a pas renvoyé 0 (result)
+**		- on lit un paquet de BUFFER_SIZE oct.
+**		- on rajoute ce paquet à la variable static.
+**	4# on recupere la line a renvoyer.
+**	5# on tronc la variable static de la ligne renvoyée.
+**	6# Si la lecture a renvoyer 0 on renvoie 0
+**	   Sinon 1 car il y a quelque chose encore à lire.
+*/
+
 int					get_next_line(const int fd, char **line)
 {
 	static char		*str_static;
 	char			*buffer;
 	int				result;
 
-	/* 
-	On verifie fd, line et buffer_size :  => -1 si problemes
-	*/
 	if (fd < 0 || !line || BUFFER_SIZE <= 0)
 		return (-1);
-	/*
-	on alloue un buffer de la taille de buffer_size
-	*/
 	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buffer)
 		return (-1);
-	/* tanque str_static ne contient pas un '\n' et que la lecture n'a pas renvoyé 0 (result)
-	*/
 	result = 1;
 	while (!nl_line(str_static) && result != 0)
 	{
-		/* on lit un paquet de BUFFER_SIZE oct*/
 		result = read(fd, buffer, BUFFER_SIZE);
 		if (result == -1)
 		{
@@ -112,17 +123,12 @@ int					get_next_line(const int fd, char **line)
 			return (-1);
 		}
 		buffer[result] = '\0';
-		/* on rajoute ce paquet à la variable static*/
 		str_static = ft_strjoin(str_static, buffer);
 	}
 	free(buffer);
-	/* on recupere la line a renvoyer */
 	*line = recup_line(str_static);
-	/* on tronc la variable static de la ligne renvoyé */
 	str_static = save_static(str_static);
-	/* si la lecture a renvoyer 0 on renvoie 0 */
 	if (result == 0)
 		return (0);
-	/* sinon c'est qu'il y a encore quelque chose à renvoyer*/
 	return (1);
 }
