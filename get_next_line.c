@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 09:54:36 by clorin            #+#    #+#             */
-/*   Updated: 2020/10/21 09:55:59 by clorin           ###   ########.fr       */
+/*   Updated: 2020/11/24 10:59:37 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static int			nl_line(char *str)
 }
 
 /*
-**	revoie une chaine malloc de la premiere ligne de str ou str si aucun'\n'
+**	return a malloc string from the first line of str or str if none '\ n'
 */
 
 static char			*recup_line(char *str)
@@ -57,8 +57,8 @@ static char			*recup_line(char *str)
 }
 
 /*
-**	Enlève la premiere ligne rencontrée et renvoi un malloc du reste
-**	de la chaine
+**	Remove the first line encountered and return a malloc
+**  from the rest of the chain
 */
 
 static char			*save_static(char *str)
@@ -90,16 +90,16 @@ static char			*save_static(char *str)
 }
 
 /*
-**	1# On verifie fd, line et buffer_size :  => -1 si problemes.
-**	2# On alloue un buffer de la taille de buffer_size.
-**	3# Tanque str_static ne contient pas un '\n' et que la lecture
-**	n'a pas renvoyé 0 (result)
-**		- on lit un paquet de BUFFER_SIZE oct.
-**		- on rajoute ce paquet à la variable static.
-**	4# on recupere la line a renvoyer.
-**	5# on tronc la variable static de la ligne renvoyée.
-**	6# Si la lecture a renvoyer 0 on renvoie 0
-**	   Sinon 1 car il y a quelque chose encore à lire.
+**	1# We check fd, line and buffer_size: return -1 if problems.
+**	2# We allocate a buffer of the size of buffer_size.
+**	3# As long as str_static does not contain a '\ n'
+***		and the read has not returned 0(result)
+**		- we read a packet of BUFFER_SIZE oct.
+**		- we add this package to the static variable.
+**	4# we get the line to send back.
+**	5# we trunk the static variable of the returned row.
+**	6# If the reading returned 0 and static variable empty,
+**		we returned 0, otherwise 1 because there is still something to read.
 */
 
 int					get_next_line(const int fd, char **line)
@@ -126,6 +126,6 @@ int					get_next_line(const int fd, char **line)
 	free(buffer);
 	*line = recup_line(str_static);
 	str_static = save_static(str_static);
-	result = (result == 0) ? 0 : 1;
+	result = (result == 0 && ft_strlen(str_static) == 0) ? 0 : 1;
 	return (result);
 }
