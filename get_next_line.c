@@ -13,6 +13,11 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
+/*
+**	returns 1 if there is '\n' in the string
+**	otherwise return 0
+*/
+
 static int			nl_line(char *str)
 {
 	int				i;
@@ -88,6 +93,16 @@ static char			*save_static(char *str)
 	free(str);
 	return (dest);
 }
+static int			check_input(char *buffer, const int fd, char **line)
+{
+	if (fd < 0 || !line || BUFFER_SIZE <= 0 || !buffer)
+	{
+		if (buffer)
+			free(buffer);
+		return (0);
+	}
+	return (1);
+}
 
 /*
 **	1# We check fd, line and buffer_size: return -1 if problems.
@@ -109,7 +124,7 @@ int					get_next_line(const int fd, char **line)
 	int				result;
 
 	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer || fd < 0 || !line || BUFFER_SIZE <= 0)
+	if (!check_input(buffer, fd, line))
 		return (-1);
 	result = 1;
 	while (!nl_line(str_static) && result != 0)
