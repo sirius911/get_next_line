@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -44,7 +44,11 @@ static char			*recup_line(char *str)
 
 	i = 0;
 	if (!str)
-		return (NULL);
+	{
+		dest = (char *)malloc(1);
+		dest[0] = '\0';
+		return (dest);
+	}
 	while (str[i] && str[i] != '\n')
 		i++;
 	dest = (char *)malloc(sizeof(char) * (i + 1));
@@ -101,7 +105,8 @@ static char			*save_static(char *str)
 
 static int			check_input(char *buffer, const int fd, char **line)
 {
-	if (fd < 0 || fd > MAX_FD || !line || BUFFER_SIZE <= 0 || !buffer)
+	if (fd < 0 || fd > MAX_FD || !line || BUFFER_SIZE <= 0 || !buffer ||
+	read(fd, NULL, 0) < 0)
 	{
 		if (buffer)
 			free(buffer);
