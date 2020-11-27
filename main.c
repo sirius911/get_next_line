@@ -11,15 +11,6 @@ int main(int argc, char **argv)
 
 	line = 0;
 	printf("BUFFER_SIZE = %d\n",BUFFER_SIZE);
-	printf("printf(NULL) = %s\n",NULL);
-	// fd = open(argv[1], O_RDONLY);
-	// ret = get_next_line(fd, &buff);
-	// printf("[Return: %d] Line #%d (%p): '%s'\n", ret, ++line, buff, buff);
-	// free(buff);
-
-	// ret = get_next_line(fd, &buff);
-	// printf("[Return: %d] Line #%d (%p): '%s'\n", ret, ++line, buff, buff);
-	// free(buff);
 	if (argc == 2)
 	{
 		fd = open(argv[1], O_RDONLY);
