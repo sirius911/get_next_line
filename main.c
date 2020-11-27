@@ -51,6 +51,6 @@ int main(int argc, char **argv)
 			printf("-----------\nEnd of stdin\n");
 		close(fd);
 	}
-	system("leaks a.out");
+	system("leaks test_gnl");
 	return (0);
 }
